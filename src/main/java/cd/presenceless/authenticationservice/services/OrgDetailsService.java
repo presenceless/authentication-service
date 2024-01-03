@@ -22,7 +22,7 @@ public class OrgDetailsService implements UserDetailsService {
         return new OrgDetails();
     }
 
-    public Map<String, Object> generateToken(String userName) {
+    public Map<String, Object> generateToken(String orgName) {
         Map<String, Object> sandboxClaims = new HashMap<>();
         sandboxClaims.put("sandbox", true);
         sandboxClaims.put("requests limit", 100);
@@ -30,9 +30,9 @@ public class OrgDetailsService implements UserDetailsService {
         Map<String, Object> productionClaims = new HashMap<>();
         productionClaims.put("production", true);
 
-        return Stream.of(
-                new AbstractMap.SimpleEntry<>("sandbox", jwtService.createToken(sandboxClaims, userName)),
-                new AbstractMap.SimpleEntry<>("production", jwtService.createToken(productionClaims, userName))
-        ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
+        return Map.of(
+                "sandbox", jwtService.createToken(sandboxClaims, orgName),
+                "production", jwtService.createToken(productionClaims, orgName)
+        );
     }
 }

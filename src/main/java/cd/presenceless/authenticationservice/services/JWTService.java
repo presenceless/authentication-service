@@ -1,5 +1,6 @@
 package cd.presenceless.authenticationservice.services;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -17,7 +18,12 @@ public class JWTService {
     private String SECRET;
 
     public boolean validateToken(final String token) {
-        return switch (Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token.substring("Bearer ".length())).getBody()) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build().parseClaimsJws(token.substring("Bearer ".length()))
+                .getBody();
+
+        return switch (claims) {
             case null -> false;
             case Exception ignored -> false;
             default -> true;
@@ -30,7 +36,8 @@ public class JWTService {
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     private Key getSignKey() {
