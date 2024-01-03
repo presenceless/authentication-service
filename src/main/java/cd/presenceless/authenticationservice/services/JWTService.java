@@ -18,9 +18,13 @@ public class JWTService {
     private String SECRET;
 
     public boolean validateToken(final String token) {
-        Claims claims = Jwts.parserBuilder()
+        String extractedToken = token.substring("Bearer ".length());
+
+        Claims claims = Jwts.
+                parserBuilder()
                 .setSigningKey(getSignKey())
-                .build().parseClaimsJws(token.substring("Bearer ".length()))
+                .build()
+                .parseClaimsJws(extractedToken)
                 .getBody();
 
         return switch (claims) {
@@ -30,7 +34,7 @@ public class JWTService {
         };
     }
 
-    String createToken(Map<String, Object> claims, String userName) {
+    String createToken(String userName, Map<String, Object> claims) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userName)

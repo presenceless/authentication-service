@@ -1,16 +1,19 @@
-package cd.presenceless.authenticationservice.model;
+package cd.presenceless.authenticationservice.services;
 
+import cd.presenceless.authenticationservice.entity.Citizen;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.sql.Date;
 import java.util.Collection;
 
-public class OrgDetails implements UserDetails {
-    private String name, regNumber;
-    private Address address;
-    private Date date;
-    private boolean is_deleted, is_approved;
+public class CustomUserDetails implements UserDetails {
+    private final String username;
+    private final String password;
+
+    public CustomUserDetails(Citizen citizen) {
+        this.username = citizen.getCid();
+        this.password = citizen.getPassword();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -19,31 +22,31 @@ public class OrgDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return !is_deleted;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return !is_approved;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return is_approved;
+        return true;
     }
 }

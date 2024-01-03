@@ -1,4 +1,4 @@
-package cd.presenceless.authenticationservice.model;
+package cd.presenceless.authenticationservice.entity;
 
 import java.io.Serializable;
 

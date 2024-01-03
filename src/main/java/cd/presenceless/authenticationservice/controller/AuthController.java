@@ -1,9 +1,11 @@
 package cd.presenceless.authenticationservice.controller;
 
-import cd.presenceless.authenticationservice.services.CitizenDetailsService;
-import cd.presenceless.authenticationservice.services.JWTService;
-import cd.presenceless.authenticationservice.services.OrgDetailsService;
-import lombok.RequiredArgsConstructor;
+import cd.presenceless.authenticationservice.entity.Citizen;
+import cd.presenceless.authenticationservice.services.CitizenService;
+import cd.presenceless.authenticationservice.services.OrganisationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,29 +19,42 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
-    private final JWTService jwtService;
-    private final CitizenDetailsService citizenDetailsService;
-    private final OrgDetailsService orgDetailsService;
+    private final CitizenService citizenService;
+    private final OrganisationService organisationService;
+    private final AuthenticationManager authenticationManager;
+
+    public AuthController(CitizenService citizenService, OrganisationService organisationService, AuthenticationManager authenticationManager) {
+        this.citizenService = citizenService;
+        this.organisationService = organisationService;
+        this.authenticationManager = authenticationManager;
+    }
 
     /**
-     * Attendants
-     * This method checks for the ID and fingerprints in the database
+     * Admin
+     * This method registers the government officials
      */
-    @PostMapping("/gov")
-    public Object gov(@RequestBody Object loginCred) {
-        return citizenDetailsService.generateToken(loginCred.toString());
+    @PostMapping("/register")
+    public Object register(@RequestBody Citizen citizen) {
+        return citizenService.register(citizen);
     }
 
     /**
      * Attendants
      * This method checks for the ID and fingerprints in the database
      */
-    @PostMapping("/orgs")
-    public Object orgsL(@RequestBody Object loginCred) {
-        return orgDetailsService.generateToken(loginCred.toString());
+    @PostMapping("/gov")
+    public Object gov(@RequestBody Citizen citizen) {
+        final var authManager = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(citizen.getCid(), citizen.getPassword())
+        );
+
+        if (!authManager.isAuthenticated()) {
+            return ResponseEntity.badRequest().body("Invalid credentials");
+        }
+
+        return citizenService.generateToken(citizen.getCid());
     }
 
     /**
@@ -47,7 +62,7 @@ public class AuthController {
      */
     @GetMapping("/verify")
     public boolean verify(@RequestHeader("Authorization") String token) {
-        return jwtService.validateToken(token);
+        return citizenService.validateToken(token);
     }
 
     /**
@@ -56,7 +71,6 @@ public class AuthController {
      */
     @GetMapping("/orgs/verify")
     public boolean orgs(@RequestHeader("Authorization") String token) {
-        return jwtService.validateToken(token);
+        return organisationService.validateToken(token);
     }
-
 }

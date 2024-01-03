@@ -1,4 +1,4 @@
-package cd.presenceless.authenticationservice.model;
+package cd.presenceless.authenticationservice.entity;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -6,9 +6,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.sql.Date;
 import java.util.Collection;
 
-public class CitizenDetails implements UserDetails {
-    private String cid, roles, date;
-    private boolean is_deleted;
+public class Organisation implements UserDetails {
+    private String name, regNumber;
+    private Address address;
+    private Date date;
+    private boolean is_deleted, is_approved;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -27,12 +29,12 @@ public class CitizenDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return !is_deleted;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return !is_approved;
     }
 
     @Override
@@ -42,6 +44,6 @@ public class CitizenDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return is_approved;
     }
 }
